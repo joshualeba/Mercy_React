@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 # cargar variables de entorno desde .env
 load_dotenv()
 
+# aviso en consola si el archivo .env no existe localmente
+if not os.path.exists('.env'):
+    print("--- aviso: no se encontró el archivo .env localmente. asegúrate de crearlo basándote en .env.example ---")
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
@@ -102,6 +106,9 @@ google = oauth.register(
 
 class DatosP(db.Model):
     __tablename__ = 'DatosP'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(255), nullable=False)
     apellidoP = db.Column(db.String(255))
@@ -113,6 +120,9 @@ class DatosP(db.Model):
 
 class Usuarios(db.Model):
     __tablename__ = 'usuarios'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id_datosP = db.Column(db.Integer, db.ForeignKey('DatosP.id'), unique=True, nullable=False)
     correo_electronico = db.Column(db.String(255), nullable=False, unique=True)
@@ -130,24 +140,36 @@ class Usuarios(db.Model):
 
 class Tipo_Preguntas(db.Model):
     __tablename__ = 'Tipo_Preguntas'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(255))
     preguntas = db.relationship('PreguntasTest', back_populates='tipo_pregunta', lazy=True)
 
 class Dificultades(db.Model):
     __tablename__ = 'Dificultades'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(255))
     preguntas = db.relationship('PreguntasTest', back_populates='dificultad', lazy=True)
 
 class Categorias(db.Model):
     __tablename__ = 'Categorias'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(255))
     preguntas = db.relationship('PreguntasTest', back_populates='categoria', lazy=True)
 
 class PreguntasTest(db.Model):
     __tablename__ = 'preguntas_test'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     pregunta = db.Column(db.String(None), nullable=False)
     id_tipoPregunta = db.Column(db.Integer, db.ForeignKey('Tipo_Preguntas.id'))
@@ -162,6 +184,9 @@ class PreguntasTest(db.Model):
 
 class OpcionesRespuesta(db.Model):
     __tablename__ = 'opciones_respuesta'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     pregunta_id = db.Column(db.Integer, db.ForeignKey('preguntas_test.id'), nullable=False)
     texto_opcion = db.Column(db.String(500), nullable=False)
@@ -171,6 +196,9 @@ class OpcionesRespuesta(db.Model):
 
 class ResultadosTest(db.Model):
     __tablename__ = 'resultados_test'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     puntuacion = db.Column(db.Integer, nullable=False)
@@ -183,6 +211,9 @@ class ResultadosTest(db.Model):
 
 class Sofipos(db.Model):
     __tablename__ = 'sofipos'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(100), nullable=False)
     tasa_anual = db.Column(db.Numeric(5, 2), nullable=False)
@@ -193,6 +224,9 @@ class Sofipos(db.Model):
 
 class DiagnosticosFinancieros(db.Model):
     __tablename__ = 'diagnosticos_financieros'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     ingresos_mensuales = db.Column(db.Numeric(10,2))
@@ -206,6 +240,9 @@ class DiagnosticosFinancieros(db.Model):
 
 class Glosario(db.Model):
     __tablename__ = 'glosario'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     termino = db.Column(db.String(150), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
@@ -213,6 +250,9 @@ class Glosario(db.Model):
 
 class ActivityLog(db.Model):
     __tablename__ = 'activity_log'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     fecha = db.Column(db.DateTime, default=datetime.now)
     admin_nombre = db.Column(db.String(100))
