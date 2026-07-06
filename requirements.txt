@@ -11,3 +11,8 @@ psycopg2-binary==2.9.11
 Werkzeug==3.1.3
 requests==2.32.5
 duckduckgo-search==7.3.2
+fastapi
+uvicorn
+pydantic
+passlib[bcrypt]
+python-jose[cryptography]
