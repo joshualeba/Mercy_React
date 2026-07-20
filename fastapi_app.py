@@ -5,17 +5,30 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 import os
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from fastapi import Request, Header
 
 from database import engine, get_db, Base
 import models
 import schemas
 
-# Create tables if they don't exist
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Mercy API")
 
-# Configure CORS for React Native and Admin Web
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+API_KEY_SECRETA = "MERCY_API_KEY_SUPER_SECRET"
+
+def validar_api_key(x_api_key: str = Header(None)):
+    if x_api_key != API_KEY_SECRETA:
+        raise HTTPException(status_code=401, detail="API Key Inválida o no enviada. Acceso Denegado.")
+    return x_api_key
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -46,7 +59,8 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 @app.post("/api/registro")
-def registrar_usuario(user: schemas.UserRegister, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def registrar_usuario(request: Request, user: schemas.UserRegister, db: Session = Depends(get_db), api_key: str = Depends(validar_api_key)):
     db_user = db.query(models.Usuarios).filter(models.Usuarios.correo_electronico == user.correo_electronico.lower()).first()
     if db_user:
         raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado")
@@ -74,7 +88,8 @@ def registrar_usuario(user: schemas.UserRegister, db: Session = Depends(get_db))
     return {"success": True, "message": "Usuario registrado exitosamente"}
 
 @app.post("/api/login")
-def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, user: schemas.UserLogin, db: Session = Depends(get_db), api_key: str = Depends(validar_api_key)):
     db_user = db.query(models.Usuarios).filter(models.Usuarios.correo_electronico == user.correo.lower()).first()
     
     if not db_user:
@@ -113,7 +128,8 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     }
 
 @app.post("/api/calcular_salud")
-def calcular_salud(data: schemas.DiagnosticoIn, db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+def calcular_salud(request: Request, data: schemas.DiagnosticoIn, db: Session = Depends(get_db), api_key: str = Depends(validar_api_key)):
     if data.ingresos <= 0:
         raise HTTPException(status_code=400, detail="Los ingresos deben ser mayores a 0")
         
@@ -197,7 +213,8 @@ def calcular_salud(data: schemas.DiagnosticoIn, db: Session = Depends(get_db)):
     }
 
 @app.get("/api/sofipos_data")
-def get_sofipos_data(db: Session = Depends(get_db)):
+@limiter.limit("30/minute")
+def get_sofipos_data(request: Request, db: Session = Depends(get_db), api_key: str = Depends(validar_api_key)):
     sofipos_list = db.query(models.Sofipos).order_by(models.Sofipos.tasa_anual.desc()).all()
     data = []
     for s in sofipos_list:
@@ -264,7 +281,8 @@ def noticia_financiera():
         return {"success": False, "respuesta": "Mantén siempre el control de tus finanzas diversificando tus inversiones."}
 
 @app.post("/api/copiloto")
-def copiloto_financiero(data: schemas.CopilotoRequest):
+@limiter.limit("15/minute")
+def copiloto_financiero(request: Request, data: schemas.CopilotoRequest, api_key: str = Depends(validar_api_key)):
     if not os.environ.get("GROQ_API_KEY"):
         raise HTTPException(status_code=400, detail="Por favor configura tu GROQ_API_KEY en el archivo .env")
 

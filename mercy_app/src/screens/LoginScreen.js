@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomAlert from '../components/CustomAlert';
 import { AuthContext } from '../context/AuthContext';
 
-const API_URL = 'http://192.168.1.100:8000/api';
+const API_URL = 'https://192.168.1.100:8443/api'; // [SEGURIDAD] Cambiado a HTTPS
 const VIDEO_SOURCE = 'https://res.cloudinary.com/dpvm2gro2/video/upload/v1773878047/1_jch6qe.mp4';
 const LOGO_SOURCE = 'https://res.cloudinary.com/dpvm2gro2/image/upload/v1769711039/logo_qp8c8w.png';
 
@@ -79,6 +79,8 @@ export default function LoginScreen({ navigation }) {
       const response = await axios.post(`${API_URL}/login`, {
         correo: email.trim(),
         contrasena: password
+      }, {
+        headers: { 'x-api-key': 'MERCY_API_KEY_SUPER_SECRET' } // [SEGURIDAD] Cabecera obligatoria
       });
       
       if (response.data.success) {
