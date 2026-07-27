@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -78,6 +79,141 @@ const QUESTIONS = [
 ];
 
 export default function KnowledgeTestScreen({ navigation }) {
+  const { colors, isDarkMode } = useContext(ThemeContext);
+
+  const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    color: colors.card,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  progressHeader: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  progressText: {
+    color: '#94a3b8',
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  progressContainer: {
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 3,
+    width: '100%',
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#F59E0B', // gold for challenge
+    borderRadius: 3,
+  },
+  content: {
+    paddingHorizontal: 20,
+  },
+  questionText: {
+    color: colors.card,
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 30,
+    lineHeight: 32,
+  },
+  optionsContainer: {
+    gap: 15,
+  },
+  optionButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  optionText: {
+    color: '#f8fafc',
+    fontSize: 15,
+    flex: 1,
+    lineHeight: 22,
+    paddingRight: 10,
+  },
+  resultsContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 30,
+  },
+  resultIcon: {
+    marginBottom: 20,
+  },
+  resultTitle: {
+    color: colors.card,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  scoreCircle: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 40,
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+  },
+  scoreText: {
+    color: '#F59E0B',
+    fontSize: 48,
+    fontWeight: '900',
+  },
+  scoreDivider: {
+    color: '#64748b',
+    fontSize: 24,
+    marginHorizontal: 5,
+  },
+  scoreTotalText: {
+    color: '#94a3b8',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  resultMessage: {
+    color: '#cbd5e1',
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 40,
+  },
+  primaryButton: {
+    backgroundColor: '#3b82f6',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 16,
+  },
+  primaryButtonText: {
+    color: colors.card,
+    fontSize: 16,
+    fontWeight: 'bold',
+  }
+});
+
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
@@ -233,135 +369,4 @@ export default function KnowledgeTestScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  progressHeader: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  progressText: {
-    color: '#94a3b8',
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  progressContainer: {
-    height: 6,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 3,
-    width: '100%',
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#F59E0B', // gold for challenge
-    borderRadius: 3,
-  },
-  content: {
-    paddingHorizontal: 20,
-  },
-  questionText: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    lineHeight: 32,
-  },
-  optionsContainer: {
-    gap: 15,
-  },
-  optionButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  optionText: {
-    color: '#f8fafc',
-    fontSize: 15,
-    flex: 1,
-    lineHeight: 22,
-    paddingRight: 10,
-  },
-  resultsContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 30,
-  },
-  resultIcon: {
-    marginBottom: 20,
-  },
-  resultTitle: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  scoreCircle: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 40,
-    marginBottom: 30,
-    borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
-  },
-  scoreText: {
-    color: '#F59E0B',
-    fontSize: 48,
-    fontWeight: '900',
-  },
-  scoreDivider: {
-    color: '#64748b',
-    fontSize: 24,
-    marginHorizontal: 5,
-  },
-  scoreTotalText: {
-    color: '#94a3b8',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  resultMessage: {
-    color: '#cbd5e1',
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 40,
-  },
-  primaryButton: {
-    backgroundColor: '#3b82f6',
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 16,
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  }
-});
+

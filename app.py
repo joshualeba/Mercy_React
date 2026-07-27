@@ -732,6 +732,69 @@ def google_auth():
         return redirect(url_for('mostrar_formulario_inicio_sesion'))
 
 
+
+@app.route('/admin')
+def admin_login_page():
+    # Si ya está logueado y es admin, mandarlo al panel
+    if session.get('usuario_autenticado') and session.get('is_admin'):
+        return redirect(url_for('admin_dashboard'))
+    return render_template('admin_login.html')
+
+@app.route('/admin_auth', methods=['POST'])
+def admin_auth():
+    if request.method == 'POST':
+        correo = request.form.get('correo')
+        contrasena_ingresada = request.form.get('contrasena')
+
+        if not correo or not contrasena_ingresada:
+            return jsonify(success=False, message='Por favor, ingresa correo y contraseña.')
+
+        correo = correo.strip().lower()
+
+        try:
+            usuario = Usuarios.query.filter_by(correo_electronico=correo).first()
+            if not usuario:
+                return jsonify(success=False, message='Credenciales incorrectas o usuario no encontrado.')
+
+            if usuario.role not in ['admin', 'superadmin']:
+                return jsonify(success=False, message='Acceso denegado. Se requieren privilegios de administración.')
+
+            # Support both werkzeug and bcrypt hashes
+            is_valid = False
+            if usuario.contrasena.startswith('$2'):
+                import bcrypt
+                if bcrypt.checkpw(contrasena_ingresada.encode('utf-8'), usuario.contrasena.encode('utf-8')):
+                    is_valid = True
+            else:
+                if check_password_hash(usuario.contrasena, contrasena_ingresada):
+                    is_valid = True
+
+            if is_valid:
+                # Update last login
+                usuario.ultima_sesion = datetime.now()
+                db.session.commit()
+                
+                # Auth session
+                session['usuario_autenticado'] = True
+                session['user_id'] = usuario.id
+                session['nombres'] = usuario.datosp.nombre if usuario.datosp else "Administrador"
+                session['apellidos'] = usuario.datosp.apellidoP if usuario.datosp else ""
+                session['correo'] = usuario.correo_electronico
+                session['user_role'] = usuario.role
+                session['is_admin'] = True
+                session['auth_method'] = 'local'
+                
+                log_activity('login', f"El administrador {session['nombres']} ha iniciado sesión en el panel (vía Admin Login).")
+                
+                return jsonify(success=True, message='Autenticando...', redirect=url_for('admin_dashboard'))
+            else:
+                return jsonify(success=False, message='Credenciales incorrectas o usuario no encontrado.')
+                
+        except Exception as e:
+            db.session.rollback()
+            print(f"[ERROR] en admin_auth: {str(e)}")
+            return jsonify(success=False, message='Ocurrió un error en el servidor.')
+
 @app.route('/admin_dashboard')
 def admin_dashboard():
     if 'usuario_autenticado' not in session or not session.get('is_admin'):
@@ -1240,7 +1303,7 @@ def eliminar_cuenta():
 def logout():
     session.clear()
     flash('Has cerrado sesión exitosamente.', 'info')
-    return redirect(url_for('mostrar_pagina_estatica', filename='index.html'))
+    return redirect(url_for('admin_login_page'))
 
 @app.route('/terminos_y_condiciones')
 def terminos_y_condiciones():

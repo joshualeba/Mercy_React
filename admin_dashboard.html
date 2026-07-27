@@ -299,7 +299,8 @@
     }
 
     [data-theme="dark"] .input-group-text,
-    [data-theme="dark"] .form-control {
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select {
         background-color: #111a2e;
         border-color: rgba(255, 255, 255, 0.1);
         color: #f1f5f9;
@@ -337,15 +338,31 @@
         border-bottom-color: rgba(255, 255, 255, 0.08) !important;
     }
 
-    [data-theme="dark"] .filter-pill {
-        background: #1e293b;
-        border-color: rgba(255, 255, 255, 0.1);
-        color: #94a3b8;
+    [data-theme="dark"] .sidebar .nav-link:hover {
+        color: #ffffff !important;
     }
 
-    [data-theme="dark"] .filter-pill:hover:not(.active) {
-        border-color: #3b82f6;
-        color: #3b82f6;
+    [data-theme="dark"] .filter-pills,
+    [data-theme="dark"] .filter-btn-group {
+        background: #1e293b !important;
+    }
+
+    [data-theme="dark"] .filter-pill,
+    [data-theme="dark"] .filter-btn {
+        background: transparent !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .filter-pill.active,
+    [data-theme="dark"] .filter-btn.active {
+        background: #334155 !important;
+        color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .filter-pill:hover:not(.active),
+    [data-theme="dark"] .filter-btn:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #38bdf8 !important;
     }
 
     /* SOFIPOs en Modo Oscuro */
@@ -621,7 +638,7 @@
     [data-theme="dark"] .table-responsive::-webkit-scrollbar-track {
         background: rgba(255, 255, 255, 0.05);
     }
-    
+
     [data-theme="dark"] .table-responsive::-webkit-scrollbar-thumb {
         background-color: var(--admin-primary);
     }
@@ -884,7 +901,8 @@
 </button>
 <a class="navbar-brand d-flex align-items-center" href="#" data-section="inicio">
     <div class="me-2" style="width: 32px; height: 32px;">
-        <img src="https://res.cloudinary.com/dpvm2gro2/image/upload/v1769711039/logo_qp8c8w.png" alt="Logo Mercy" width="30"> <span class="fw-bold text-mercy">Mercy</span> <span class="ms-1 fw-light">Admin</span>
+        <img src="https://res.cloudinary.com/dpvm2gro2/image/upload/v1769711039/logo_qp8c8w.png" alt="Logo Mercy"
+            width="30"> <span class="fw-bold text-mercy">Mercy</span> <span class="ms-1 fw-light">Admin</span>
     </div>
 </a>
 {% endblock %}
@@ -1041,7 +1059,8 @@
                     </div>
                     <button class="btn btn-link btn-sm w-100 text-decoration-none fw-bold mt-2"
                         style="font-size: 0.7rem;"
-                        onclick="document.querySelector('[data-section=\'usuarios\']').click()">Ver historial completo</button>
+                        onclick="document.querySelector('[data-section=\'usuarios\']').click()">Ver historial
+                        completo</button>
                 </div>
             </div>
         </div>
@@ -1096,7 +1115,8 @@
                         style="width: 24px; height: 24px;">
                         <i class="bi bi-shield-lock-fill text-white" style="font-size: 0.75rem;"></i>
                     </div>
-                    <span class="fw-bold" style="font-size: 0.8rem; letter-spacing: -0.01em;">Sesión de superadmin</span>
+                    <span class="fw-bold" style="font-size: 0.8rem; letter-spacing: -0.01em;">Sesión de
+                        superadmin</span>
                 </div>
             </div>
             {% endif %}
@@ -1165,20 +1185,20 @@
                         <button class="action-button opacity-50" disabled title="SuperAdmin protegido">
                             <i class="bi bi-person-fill-lock text-muted"></i>
                         </button>
-                        
+
                         {# Los Admins pueden ser gestionados por el SuperAdmin, pero otros Admins ven candado #}
                         {% elif u.role == 'admin' %}
-                            {% if admin.rol == 'superadmin' %}
-                            <button class="action-button btn-view-file" data-id="{{ u.id }}"
-                                title="Gestionar permisos administrativos">
-                                <i class="bi bi-shield-lock text-primary"></i>
-                            </button>
-                            {% else %}
-                            <button class="action-button opacity-50" disabled title="Administrador protegido">
-                                <i class="bi bi-person-fill-lock text-muted"></i>
-                            </button>
-                            {% endif %}
-                        
+                        {% if admin.rol == 'superadmin' %}
+                        <button class="action-button btn-view-file" data-id="{{ u.id }}"
+                            title="Gestionar permisos administrativos">
+                            <i class="bi bi-shield-lock text-primary"></i>
+                        </button>
+                        {% else %}
+                        <button class="action-button opacity-50" disabled title="Administrador protegido">
+                            <i class="bi bi-person-fill-lock text-muted"></i>
+                        </button>
+                        {% endif %}
+
                         {# Los Clientes son accesibles para ambos tipos de admin #}
                         {% else %}
                         <button class="action-button btn-view-file" data-id="{{ u.id }}"
@@ -1219,6 +1239,8 @@
                     <div class="filter-pill" data-cat="inversion">Inversión</div>
                     <div class="filter-pill" data-cat="credito">Crédito</div>
                     <div class="filter-pill" data-cat="digital">Digital</div>
+                    <div class="filter-pill" data-cat="ahorro">Ahorro</div>
+                    <div class="filter-pill" data-cat="presupuesto">Presupuesto</div>
                 </div>
             </div>
 
@@ -1331,7 +1353,6 @@
                         </div>
                     </div>
                     <div class="text-end">
-                        <div id="risk-badge" class="badge rounded-pill px-3 py-2 mb-2"></div>
                         <div class="small fw-bold text-muted" id="modal-auth-method"></div>
                     </div>
                 </div>
@@ -1352,7 +1373,7 @@
                 </div>
 
                 <div class="row g-4 mb-4" id="modal-client-sections">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <div class="p-3 bg-light rounded-4 h-100 border">
                             <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
                                 <i class="bi bi-clipboard2-check-fill text-primary"></i>Test de conocimientos
@@ -1369,29 +1390,6 @@
                                         <div id="test-progress-bar" class="progress-bar" style="width: 0%"></div>
                                     </div>
                                     <p class="text-center small text-muted mt-2 mb-0" id="test-date"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light rounded-4 h-100 border">
-                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
-                                <i class="bi bi-heart-pulse-fill text-danger"></i>Salud financiera
-                            </h6>
-                            <div id="diag-status-area">
-                                <p class="small text-muted mb-2">Último resultado:</p>
-                                <div class="bg-white p-3 rounded-3 border">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div class="text-center flex-grow-1 border-end">
-                                            <h3 id="diag-score" class="fw-bold mb-0"></h3>
-                                            <small class="text-muted">Puntos</small>
-                                        </div>
-                                        <div class="flex-grow-1 ps-3">
-                                            <p class="small mb-1">Ingresos: <b id="diag-ingresos"></b></p>
-                                            <p class="small mb-0">Gastos: <b id="diag-gastos"></b></p>
-                                        </div>
-                                    </div>
-                                    <p class="text-center small text-muted mb-0" id="diag-date"></p>
                                 </div>
                             </div>
                         </div>
@@ -1417,14 +1415,16 @@
                                 <span>Eliminar definitivamente</span>
                             </button>
                         </div>
-                        <p class="text-center small text-muted mt-3 mb-0">Estas acciones son permanentes y requieren privilegios de SuperAdmin.</p>
+                        <p class="text-center small text-muted mt-3 mb-0">Estas acciones son permanentes y requieren
+                            privilegios de SuperAdmin.</p>
                     </div>
                 </div>
             </div>
             {% endif %}
 
             <div class="modal-footer border-0 p-4 pt-0">
-                <button type="button" class="btn btn-light btn-round w-100 py-3 fw-bold" data-bs-dismiss="modal">Cerrar expediente</button>
+                <button type="button" class="btn btn-light btn-round w-100 py-3 fw-bold" data-bs-dismiss="modal">Cerrar
+                    expediente</button>
             </div>
         </div>
     </div>
@@ -1442,10 +1442,12 @@
                 <h4 class="fw-bold mb-0">¿Terminar sesión?</h4>
             </div>
             <div class="custom-modal-body text-center">
-                <p class="text-muted mb-0">Tu sesión de administración se cerrará. deberás volver a autenticarte para realizar cambios internos.</p>
+                <p class="text-muted mb-0">Tu sesión de administración se cerrará. deberás volver a autenticarte para
+                    realizar cambios internos.</p>
             </div>
             <div class="custom-modal-footer d-flex gap-2 w-100">
-                <button type="button" class="btn btn-light btn-round flex-grow-1" data-bs-dismiss="modal">Mantener activo</button>
+                <button type="button" class="btn btn-light btn-round flex-grow-1" data-bs-dismiss="modal">Mantener
+                    activo</button>
                 <a href="/logout" class="btn btn-danger btn-round flex-grow-1">Sí, finalizar</a>
             </div>
         </div>
@@ -1474,6 +1476,8 @@
                             <option value="inversion">Inversión</option>
                             <option value="credito">Crédito</option>
                             <option value="digital">Digital</option>
+                            <option value="ahorro">Ahorro</option>
+                            <option value="presupuesto">Presupuesto</option>
                         </select>
                     </div>
                     <div class="mb-0">
@@ -1486,7 +1490,8 @@
             <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
                 <button type="button" class="btn btn-light btn-round flex-grow-1"
                     data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-dark btn-round flex-grow-1" id="saveGlossaryBtn">Guardar cambios</button>
+                <button type="button" class="btn btn-dark btn-round flex-grow-1" id="saveGlossaryBtn">Guardar
+                    cambios</button>
             </div>
         </div>
     </div>
@@ -1523,10 +1528,7 @@
                         <input type="number" step="0.01" class="form-control" id="sofipoNicap" required
                             placeholder="0.00">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">URL del logo (opcional)</label>
-                        <input type="url" class="form-control" id="sofipoLogo" placeholder="https://...">
-                    </div>
+
                     <div class="mb-0">
                         <label class="form-label small fw-bold text-muted">Enlace web oficial</label>
                         <input type="url" class="form-control" id="sofipoUrl" required placeholder="https://...">
@@ -1536,7 +1538,8 @@
             <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
                 <button type="button" class="btn btn-light btn-round flex-grow-1"
                     data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-dark btn-round flex-grow-1" id="saveSofipoBtn">Guardar institución</button>
+                <button type="button" class="btn btn-dark btn-round flex-grow-1" id="saveSofipoBtn">Guardar
+                    institución</button>
             </div>
         </div>
     </div>
@@ -1730,7 +1733,7 @@
                 if (s) s.classList.remove('active');
                 if (b) b.classList.remove('active');
                 document.body.style.overflow = '';
-                
+
                 logoutModal.show();
             });
         }
@@ -1964,26 +1967,13 @@
                         const authMethod = data.metodo_auth === 'Google' ? 'Google' : 'correo y cuenta';
                         document.getElementById('modal-auth-method').innerHTML = `<i class="bi bi-${data.metodo_auth === 'Google' ? 'google' : 'person-lock'}"></i> Acceso: ${authMethod}`;
 
-                        // Lógica del badge de atención (Prioridad de seguimiento)
-                        const riskBadge = document.getElementById('risk-badge');
-                        const health = data.diagnostico.puntaje_salud || 0;
-
-                        if (health > 70) {
-                            riskBadge.innerText = 'Seguimiento estándar';
-                            riskBadge.className = 'badge bg-success text-white badge-premium rounded-pill px-3 py-2 mb-2';
-                        } else if (health > 40) {
-                            riskBadge.innerText = 'Atención moderada';
-                            riskBadge.className = 'badge bg-warning text-dark badge-premium rounded-pill px-3 py-2 mb-2';
-                        } else {
-                            riskBadge.innerText = 'Atención prioritaria';
-                            riskBadge.className = 'badge bg-danger text-white badge-premium rounded-pill px-3 py-2 mb-2';
-                        }
+                        // Lógica del badge de atención (Prioridad de seguimiento) eliminada según solicitud.
 
                         // Botón de Rol (solo si existe - SuperAdmin)
                         const roleBtnText = document.getElementById('modal-role-text');
                         const roleBtn = document.getElementById('modal-btn-role');
                         const clientSections = document.getElementById('modal-client-sections');
-                        
+
                         // Ocultar secciones de expediente (test/diag) si el usuario es Admin
                         if (clientSections) {
                             clientSections.classList.toggle('d-none', data.rol !== 'cliente');
@@ -2021,20 +2011,7 @@
                         }
 
                         // Lógica del diagnóstico
-                        const diagScore = document.getElementById('diag-score');
-                        if (data.diagnostico.realizado) {
-                            diagScore.innerText = data.diagnostico.puntaje_salud;
-                            diagScore.className = `fw-bold mb-0 text-${data.diagnostico.puntaje_salud > 70 ? 'success' : (data.diagnostico.puntaje_salud > 40 ? 'warning' : 'danger')}`;
-                            document.getElementById('diag-ingresos').innerText = `$${data.diagnostico.ingresos.toLocaleString()}`;
-                            document.getElementById('diag-gastos').innerText = `$${data.diagnostico.gastos.toLocaleString()}`;
-                            document.getElementById('diag-date').innerText = `Último análisis: ${data.diagnostico.fecha}`;
-                        } else {
-                            diagScore.innerText = '---';
-                            diagScore.className = 'fw-bold mb-0 text-muted';
-                            document.getElementById('diag-ingresos').innerText = '---';
-                            document.getElementById('diag-gastos').innerText = '---';
-                            document.getElementById('diag-date').innerText = 'Sin diagnóstico registrado.';
-                        }
+                        // Lógica de diagnóstico financiero eliminada de la interfaz de usuario.
 
                         modal.show();
                     } else {
@@ -2298,7 +2275,7 @@
                     <td class="text-center fw-bold text-primary">${s.tasa_anual}%</td>
                     <td class="text-center text-muted">${s.plazo_dias} días</td>
                     <td class="text-center">
-                        <span class="badge ${s.nicap >131 ? 'bg-success' : 'bg-warning'} bg-opacity-10 ${s.nicap > 131 ? 'text-success' : 'text-warning'} rounded-pill"> ${s.nicap}%</span>
+                        <span class="badge ${s.nicap > 131 ? 'bg-success' : 'bg-warning'} bg-opacity-10 ${s.nicap > 131 ? 'text-success' : 'text-warning'} rounded-pill"> ${s.nicap}%</span>
                     </td>
                     <td class="pe-4 text-end">
                         <div class="d-flex gap-2 justify-content-end">
@@ -2368,7 +2345,7 @@
             document.getElementById('sofipoTasa').value = sofipo.tasa_anual;
             document.getElementById('sofipoPlazo').value = sofipo.plazo_dias;
             document.getElementById('sofipoNicap').value = sofipo.nicap;
-            document.getElementById('sofipoLogo').value = sofipo.logo_url || '';
+
             document.getElementById('sofipoUrl').value = sofipo.url_web || '';
             document.getElementById('sofipoModalTitle').innerText = 'Editar institución';
             sofipoModal.show();
@@ -2381,7 +2358,7 @@
                 tasa_anual: document.getElementById('sofipoTasa').value,
                 plazo_dias: document.getElementById('sofipoPlazo').value,
                 nicap: document.getElementById('sofipoNicap').value,
-                logo_url: document.getElementById('sofipoLogo').value,
+
                 url_web: document.getElementById('sofipoUrl').value
             };
 

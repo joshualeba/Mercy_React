@@ -1,59 +1,88 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [userToken, setUserToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    checkLoggedInUser();
-  }, []);
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const checkLoggedInUser = async () => {
+  const login = async (correo, contrasena) => {
+    setIsLoading(true);
     try {
-      const userData = await AsyncStorage.getItem('mercy_current_user');
-      if (userData) {
-        setUser(JSON.parse(userData));
+      const response = await axios.post('http://192.168.1.7:8000/api/login', { correo, contrasena });
+
+      if (response.data.access_token) {
+        setUserToken(response.data.access_token);
+        setUser(response.data.user);
+        await AsyncStorage.setItem('userToken', response.data.access_token);
+        await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+        setIsLoading(false);
+        return { success: true };
       }
-    } catch (error) {
-      console.log('Error checking user:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const login = async (userData) => {
-    try {
-      setUser(userData);
-      await AsyncStorage.setItem('mercy_current_user', JSON.stringify(userData));
-    } catch (error) {
-      console.log('Error saving user data:', error);
+    } catch (e) {
+      setIsLoading(false);
+      console.log(`Login error: ${e}`);
+      let errorMsg = "Error al iniciar sesión. Revisa tus credenciales.";
+      if (e.response && e.response.data && e.response.data.detail) {
+          errorMsg = e.response.data.detail;
+      }
+      return { success: false, message: errorMsg };
     }
   };
 
   const logout = async () => {
-    try {
-      setUser(null);
-      await AsyncStorage.removeItem('mercy_current_user');
-    } catch (error) {
-      console.log('Error removing user data:', error);
-    }
+    setIsLoading(true);
+    await sleep(2000);
+    setUserToken(null);
+    setUser(null);
+    await AsyncStorage.removeItem('userToken');
+    await AsyncStorage.removeItem('user');
+    setIsLoading(false);
   };
 
-  const updateUser = async (newUserData) => {
+  const isLoggedIn = async () => {
     try {
-      const updatedUser = { ...user, ...newUserData };
-      setUser(updatedUser);
-      await AsyncStorage.setItem('mercy_current_user', JSON.stringify(updatedUser));
-    } catch (error) {
-      console.log('Error updating user data:', error);
+      setIsLoading(true);
+      await sleep(2000);
+      let token = await AsyncStorage.getItem('userToken');
+      let userData = await AsyncStorage.getItem('user');
+      if (token && userData) {
+        try {
+          await axios.get('http://192.168.1.7:8000/api/verify_session', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setUserToken(token);
+          setUser(JSON.parse(userData));
+        } catch (apiError) {
+          await AsyncStorage.removeItem('userToken');
+          await AsyncStorage.removeItem('user');
+          setUserToken(null);
+          setUser(null);
+        }
+      }
+      setIsLoading(false);
+    } catch (e) {
+      console.log(`isLoggedIn error: ${e}`);
+      setIsLoading(false);
     }
   };
+  
+  const updateUser = async (newUser) => {
+      setUser(newUser);
+      await AsyncStorage.setItem('user', JSON.stringify(newUser));
+  };
+
+  useEffect(() => {
+    isLoggedIn();
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ login, logout, isLoading, userToken, user, updateUser, userName: user?.nombre || '' }}>
       {children}
     </AuthContext.Provider>
   );

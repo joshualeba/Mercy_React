@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # Base de Datos Centralizada
+  mercy_db:
+    image: postgres:15
+    container_name: mercy_db
+    environment:
+      POSTGRES_USER: mercy_user
+      POSTGRES_PASSWORD: mercy_password
+      POSTGRES_DB: mercy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - red_privada
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mercy_user -d mercy"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación FastAPI (Backend Móvil)
+  api_privada:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: mercy_api
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://mercy_user:mercy_password@mercy_db/mercy
+    ports:
+      - "8000:8000"
+    depends_on:
+      mercy_db:
+        condition: service_healthy
+    networks:
+      - red_publica
+      - red_privada
+
+  # Aplicación Flask (Panel Admin Web)
+  mercy_admin:
+    build:
+      context: ../
+      dockerfile: Dockerfile.admin
+    container_name: mercy_admin
+    environment:
+      - DATABASE_URL=postgresql://mercy_user:mercy_password@mercy_db/mercy
+    ports:
+      - "5000:5000"
+    depends_on:
+      mercy_db:
+        condition: service_healthy
+    networks:
+      - red_publica
+      - red_privada
+
+  # Balanceador de Carga y Proxy (Nginx)
+  nginx:
+    image: nginx:latest
+    container_name: mercy_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api_privada
+    networks:
+      - red_publica
+      - red_privada
+
+  # Monitoreo (Prometheus)
+  prometheus:
+    image: prom/prometheus
+    container_name: mercy_prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - red_privada
+
+  # Dashboards Visuales de Monitoreo (Grafana)
+  grafana:
+    image: grafana/grafana
+    container_name: mercy_grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - red_privada
+
+networks:
+  red_publica:
+    driver: bridge
+  red_privada:
+    internal: true
+
+volumes:
+  postgres_data:

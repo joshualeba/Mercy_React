@@ -1,366 +1,300 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Animated, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
+import { useCustomAlert } from '../context/AlertContext';
+import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen({ navigation }) {
-  const { user, updateUser } = useContext(AuthContext);
-  const { isDarkTheme, themeColors } = useContext(ThemeContext);
-  
-  const fullName = [user?.nombres, user?.apellidos].filter(Boolean).join(' ') || user?.nombre || 'Usuario';
-  const initialName = fullName;
-  const initialEmail = user?.correo_electronico || user?.email || 'correo@mercy.com';
-  
+  const { user, userToken, updateUser } = useContext(AuthContext);
+  const { isDarkTheme, colors } = useContext(ThemeContext);
+  const { showAlert } = useCustomAlert();
+
   const [isEditing, setIsEditing] = useState(false);
-  const [nombre, setNombre] = useState(initialName);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Field states
+  const initialName = user?.nombre_completo || user?.nombre || 'Usuario';
+  const initialEmail = user?.correo || user?.correo_electronico || 'correo@mercy.com';
+  const [nombre, setNombre] = useState(initialName);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Eye visibility states
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+      if (user?.nombre_completo || user?.nombre) {
+          setNombre(user?.nombre_completo || user?.nombre || 'Usuario');
+      }
+  }, [user]);
+
   // Validations
+  const cleanNameInput = (text) => text.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+  
   const isNameValid = (name) => {
     const trimmed = name.trim();
-    if (trimmed.length > 100) return false;
-    const words = trimmed.split(/\s+/);
-    if (words.length < 2) return false;
+    if (trimmed.length < 3) return false;
     const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     return regex.test(trimmed);
   };
 
-  const hasLength = password.length >= 8 && password.length <= 25;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasSpecialChar = /[!@#$&*.,?_=-]/.test(password);
+  const hasLength = newPassword.length >= 8 && newPassword.length <= 25;
+  const hasUppercase = /[A-Z]/.test(newPassword);
+  const hasSpecialChar = /[!@#$&*.,?_=-]/.test(newPassword);
   
-  const isPasswordValid = password === '' || (hasLength && hasUppercase && hasSpecialChar && password === confirmPassword);
-
-  const cleanNameInput = (text) => {
-    return text.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-  };
+  const isPasswordValid = newPassword === '' || (hasLength && hasUppercase && hasSpecialChar && newPassword === confirmPassword);
 
   const handleSave = async () => {
     if (!isNameValid(nombre)) {
-      Alert.alert('Error', 'El nombre debe contener al menos 2 palabras, sin números ni caracteres especiales, y máximo 100 letras.');
+      showAlert('Error', 'Ingresa un nombre válido (solo letras, mínimo 3 caracteres).');
       return;
     }
     
-    if (password !== '' && !isPasswordValid) {
-      Alert.alert('Error', 'La contraseña no cumple con los requisitos o no coinciden.');
+    if (newPassword !== '' && !isPasswordValid) {
+      showAlert('Error', 'La nueva contraseña no cumple con los requisitos o no coinciden.');
       return;
     }
     
+    if (newPassword !== '' && currentPassword === '') {
+      showAlert('Error', 'Ingresa tu contraseña actual para autorizar el cambio.');
+      return;
+    }
+
     setIsSaving(true);
+    
     try {
-      const usersData = await AsyncStorage.getItem('mercy_users_db');
-      let users = usersData ? JSON.parse(usersData) : [];
-      
-      const userIndex = users.findIndex(u => u.correo_electronico === initialEmail);
-      if (userIndex !== -1) {
-        users[userIndex].nombres = nombre.trim();
-        if (password !== '') {
-          users[userIndex].contrasena = password;
+        const payload = {
+            nombre: nombre,
+            password_actual: currentPassword !== '' ? currentPassword : null,
+            password_nueva: newPassword !== '' ? newPassword : null,
+        };
+        
+        const response = await axios.put('http://192.168.1.7:8000/api/update_profile', payload, {
+            headers: { Authorization: `Bearer ${userToken}` }
+        });
+        
+        if (response.data.success) {
+            showAlert('Éxito', 'Tu perfil ha sido actualizado.');
+            setIsEditing(false);
+            
+            // Update local context
+            let updatedUser = { ...user };
+            updatedUser.nombre = response.data.nombre_pila || updatedUser.nombre;
+            updatedUser.apellidoP = response.data.apellido || updatedUser.apellidoP;
+            updatedUser.nombre_completo = response.data.nombre;
+            
+            updateUser(updatedUser);
+            
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
         }
-        await AsyncStorage.setItem('mercy_users_db', JSON.stringify(users));
-      }
-      
-      await updateUser({ nombre: nombre.trim() });
-      setIsEditing(false);
-      setPassword('');
-      setConfirmPassword('');
-      Alert.alert('¡Éxito!', 'Tus datos han sido actualizados.');
-    } catch (error) {
-      Alert.alert('Error', 'Hubo un problema al guardar tus datos.');
+    } catch (e) {
+        if (e.response && e.response.data && e.response.data.detail) {
+            showAlert('Error', e.response.data.detail);
+        } else {
+            showAlert('Error', 'Ocurrió un error al guardar los cambios.');
+        }
     } finally {
-      setIsSaving(false);
+        setIsSaving(false);
     }
   };
 
   const renderChecklist = () => {
-    if (password === '') return null;
+    if (newPassword === '' && !isEditing) return null;
     return (
-      <View style={styles.checklist}>
-        <View style={styles.checkItem}>
-          <MaterialCommunityIcons name={hasLength ? "check-circle" : "close-circle"} size={16} color={hasLength ? "#10B981" : "#EF4444"} />
-          <Text style={[styles.checkText, { color: hasLength ? "#10B981" : "#EF4444" }]}> 8 a 25 caracteres</Text>
+      <View style={styles.checklistContainer}>
+        <Text style={styles.checklistTitle}>Requisitos de la nueva contraseña:</Text>
+        <View style={styles.checklistItem}>
+          <Ionicons name={hasLength ? "checkmark-circle" : "ellipse-outline"} size={16} color={hasLength ? "#4CAF50" : colors.textMuted} />
+          <Text style={[styles.checklistText, hasLength && styles.checklistTextValid]}>8 a 25 caracteres</Text>
         </View>
-        <View style={styles.checkItem}>
-          <MaterialCommunityIcons name={hasUppercase ? "check-circle" : "close-circle"} size={16} color={hasUppercase ? "#10B981" : "#EF4444"} />
-          <Text style={[styles.checkText, { color: hasUppercase ? "#10B981" : "#EF4444" }]}> 1 letra mayúscula</Text>
+        <View style={styles.checklistItem}>
+          <Ionicons name={hasUppercase ? "checkmark-circle" : "ellipse-outline"} size={16} color={hasUppercase ? "#4CAF50" : colors.textMuted} />
+          <Text style={[styles.checklistText, hasUppercase && styles.checklistTextValid]}>Al menos 1 mayúscula</Text>
         </View>
-        <View style={styles.checkItem}>
-          <MaterialCommunityIcons name={hasSpecialChar ? "check-circle" : "close-circle"} size={16} color={hasSpecialChar ? "#10B981" : "#EF4444"} />
-          <Text style={[styles.checkText, { color: hasSpecialChar ? "#10B981" : "#EF4444" }]}> 1 carácter especial (!@#$&*.,?_=-)</Text>
+        <View style={styles.checklistItem}>
+          <Ionicons name={hasSpecialChar ? "checkmark-circle" : "ellipse-outline"} size={16} color={hasSpecialChar ? "#4CAF50" : colors.textMuted} />
+          <Text style={[styles.checklistText, hasSpecialChar && styles.checklistTextValid]}>Al menos 1 carácter especial</Text>
         </View>
-        <View style={styles.checkItem}>
-          <MaterialCommunityIcons name={password === confirmPassword && password !== '' ? "check-circle" : "close-circle"} size={16} color={password === confirmPassword && password !== '' ? "#10B981" : "#EF4444"} />
-          <Text style={[styles.checkText, { color: password === confirmPassword && password !== '' ? "#10B981" : "#EF4444" }]}> Las contraseñas coinciden</Text>
-        </View>
+        {newPassword !== '' && (
+          <View style={styles.checklistItem}>
+            <Ionicons name={(newPassword === confirmPassword && confirmPassword !== '') ? "checkmark-circle" : "ellipse-outline"} size={16} color={(newPassword === confirmPassword && confirmPassword !== '') ? "#4CAF50" : colors.textMuted} />
+            <Text style={[styles.checklistText, (newPassword === confirmPassword && confirmPassword !== '') && styles.checklistTextValid]}>Las contraseñas coinciden</Text>
+          </View>
+        )}
       </View>
     );
   };
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
+    headerLeft: { flexDirection: 'row', alignItems: 'center' },
+    title: { fontSize: 20, fontWeight: 'bold', marginLeft: 15, color: colors.text },
+    editBtn: { backgroundColor: colors.primary, paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
+    editBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+    scrollContent: { padding: 20, paddingBottom: 40 },
+    
+    avatarContainer: { alignItems: 'center', marginBottom: 30, marginTop: 10 },
+    avatar: { width: 100, height: 100, borderRadius: 50, backgroundColor: colors.primary + '20', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
+    avatarInitials: { fontSize: 36, fontWeight: 'bold', color: colors.primary },
+    userName: { fontSize: 24, fontWeight: 'bold', color: colors.text, marginBottom: 5 },
+    userRole: { fontSize: 14, color: colors.primary, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 },
+
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15, marginTop: 10 },
+    
+    inputGroup: { marginBottom: 20 },
+    label: { fontSize: 14, fontWeight: 'bold', color: colors.textMuted, marginBottom: 8, marginLeft: 4 },
+    inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: isEditing ? colors.inputBackground : colors.background, borderWidth: 1, borderColor: isEditing ? colors.border : colors.background, borderRadius: 12, paddingHorizontal: 15 },
+    inputWrapperDisabled: { backgroundColor: colors.card, borderColor: colors.border, opacity: 0.7 },
+    icon: { marginRight: 10 },
+    input: { flex: 1, height: 50, color: colors.text, fontSize: 16 },
+    eyeIcon: { padding: 10 },
+    
+    checklistContainer: { marginTop: 5, paddingHorizontal: 10, marginBottom: 20 },
+    checklistTitle: { fontSize: 13, color: colors.text, fontWeight: 'bold', marginBottom: 8 },
+    checklistItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
+    checklistText: { fontSize: 13, color: colors.textMuted, marginLeft: 8 },
+    checklistTextValid: { color: "#4CAF50" },
+
+    saveBtn: { backgroundColor: colors.primary, borderRadius: 12, height: 55, justifyContent: 'center', alignItems: 'center', marginTop: 10, shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+    saveBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
+  });
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.bg }]} edges={['bottom']}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <MaterialCommunityIcons name="arrow-left" size={24} color={themeColors.textMain} />
-            <Text style={[styles.backButtonText, { color: themeColors.textMain }]}>Regresar</Text>
+    <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+        style={{ flex: 1 }}
+      >
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
+          <Text style={styles.title}>Mi Perfil</Text>
+        </View>
+        <TouchableOpacity style={styles.editBtn} onPress={() => setIsEditing(!isEditing)}>
+          <Text style={styles.editBtnText}>{isEditing ? 'Cancelar' : 'Editar'}</Text>
+        </TouchableOpacity>
+      </View>
 
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarText}>{(nombre || 'U').charAt(0).toUpperCase()}</Text>
-            </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        
+        <View style={styles.avatarContainer}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarInitials}>{user?.nombre && user?.apellidoP ? `${user.nombre.charAt(0)}${user.apellidoP.charAt(0)}`.toUpperCase() : nombre.substring(0, 2).toUpperCase()}</Text>
           </View>
+          <Text style={styles.userName}>{nombre}</Text>
+          <Text style={styles.userRole}>Cliente Activo</Text>
+        </View>
 
-          <View style={[styles.formSection, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}>
-            <Text style={[styles.label, { color: themeColors.textSec }]}>Correo Electrónico (No editable)</Text>
-            <View style={[styles.inputContainer, { backgroundColor: isDarkTheme ? 'rgba(0,0,0,0.2)' : '#e2e8f0', borderColor: themeColors.divider }]}>
-              <MaterialCommunityIcons name="email-outline" size={20} color="#64748b" style={styles.inputIcon} />
-              <TextInput
-                style={[styles.input, { color: '#94a3b8' }]}
-                value={initialEmail}
-                editable={false}
-              />
-            </View>
+        <Text style={styles.sectionTitle}>Datos Personales</Text>
+        
+        {/* Email Field (Locked) */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Correo Electrónico (No editable)</Text>
+          <View style={[styles.inputWrapper, styles.inputWrapperDisabled]}>
+            <Ionicons name="mail" size={20} color={colors.textMuted} style={styles.icon} />
+            <TextInput style={styles.input} value={initialEmail} editable={false} color={colors.textMuted} />
+          </View>
+        </View>
 
-            <View style={styles.editToggleContainer}>
-              <Text style={[styles.sectionTitle, { color: themeColors.textMain }]}>Datos Personales</Text>
-              {!isEditing && (
-                <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
-                  <MaterialCommunityIcons name="pencil" size={16} color="#3b82f6" />
-                  <Text style={styles.editButtonText}>Editar perfil</Text>
+        {/* Name Field */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Nombre Completo</Text>
+          <View style={[styles.inputWrapper, !isEditing && styles.inputWrapperDisabled]}>
+            <Ionicons name="person" size={20} color={isEditing ? colors.primary : colors.textMuted} style={styles.icon} />
+            <TextInput 
+              style={styles.input} 
+              value={nombre} 
+              onChangeText={(t) => setNombre(cleanNameInput(t))} 
+              editable={isEditing}
+              placeholder="Ej. Juan Pérez"
+              placeholderTextColor={colors.textMuted}
+            />
+          </View>
+        </View>
+
+        {isEditing && (
+          <View>
+            <Text style={[styles.sectionTitle, {marginTop: 20}]}>Cambiar Contraseña (Opcional)</Text>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Contraseña Actual</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="lock-closed" size={20} color={colors.textMuted} style={styles.icon} />
+                <TextInput 
+                  style={styles.input} 
+                  value={currentPassword} 
+                  onChangeText={setCurrentPassword} 
+                  secureTextEntry={!showCurrent}
+                  placeholder="********"
+                  placeholderTextColor={colors.textMuted}
+                />
+                <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)} style={styles.eyeIcon}>
+                  <Ionicons name={showCurrent ? "eye-off" : "eye"} size={20} color={colors.textMuted} />
                 </TouchableOpacity>
-              )}
+              </View>
             </View>
 
-            <Text style={[styles.label, { color: themeColors.textSec }]}>Nombre completo</Text>
-            <View style={[styles.inputContainer, { backgroundColor: isEditing ? (isDarkTheme ? 'rgba(255,255,255,0.05)' : '#ffffff') : (isDarkTheme ? 'rgba(0,0,0,0.2)' : '#e2e8f0'), borderColor: themeColors.divider }]}>
-              <MaterialCommunityIcons name="account-outline" size={20} color={isEditing ? themeColors.textMain : "#94a3b8"} style={styles.inputIcon} />
-              <TextInput
-                style={[styles.input, { color: isEditing ? themeColors.textMain : '#94a3b8' }]}
-                value={nombre}
-                onChangeText={(text) => setNombre(cleanNameInput(text))}
-                placeholder="Tu nombre completo"
-                placeholderTextColor="#64748b"
-                editable={isEditing}
-                maxLength={100}
-              />
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Nueva Contraseña</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="key" size={20} color={colors.primary} style={styles.icon} />
+                <TextInput 
+                  style={styles.input} 
+                  value={newPassword} 
+                  onChangeText={setNewPassword} 
+                  secureTextEntry={!showNew}
+                  placeholder="********"
+                  placeholderTextColor={colors.textMuted}
+                />
+                <TouchableOpacity onPress={() => setShowNew(!showNew)} style={styles.eyeIcon}>
+                  <Ionicons name={showNew ? "eye-off" : "eye"} size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
             </View>
-            {isEditing && !isNameValid(nombre) && nombre.length > 0 && (
-              <Text style={styles.errorInline}>Debe contener al menos 2 palabras sin caracteres especiales.</Text>
-            )}
 
-            {isEditing && (
-              <>
-                <Text style={[styles.label, { color: themeColors.textSec, marginTop: 10 }]}>Nueva Contraseña (Opcional)</Text>
-                <View style={[styles.inputContainer, { backgroundColor: isDarkTheme ? 'rgba(255,255,255,0.05)' : '#ffffff', borderColor: themeColors.divider }]}>
-                  <MaterialCommunityIcons name="lock-outline" size={20} color={themeColors.textMain} style={styles.inputIcon} />
-                  <TextInput
-                    style={[styles.input, { color: themeColors.textMain }]}
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="Ingresa una nueva contraseña"
-                    placeholderTextColor="#64748b"
-                    secureTextEntry
-                  />
-                </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Confirmar Nueva Contraseña</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="checkmark-done-circle" size={20} color={(newPassword === confirmPassword && confirmPassword !== '') ? "#4CAF50" : colors.textMuted} style={styles.icon} />
+                <TextInput 
+                  style={styles.input} 
+                  value={confirmPassword} 
+                  onChangeText={setConfirmPassword} 
+                  secureTextEntry={!showConfirm}
+                  placeholder="********"
+                  placeholderTextColor={colors.textMuted}
+                />
+                <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)} style={styles.eyeIcon}>
+                  <Ionicons name={showConfirm ? "eye-off" : "eye"} size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+            </View>
 
-                {password.length > 0 && (
-                  <>
-                    <Text style={[styles.label, { color: themeColors.textSec }]}>Confirmar Nueva Contraseña</Text>
-                    <View style={[styles.inputContainer, { backgroundColor: isDarkTheme ? 'rgba(255,255,255,0.05)' : '#ffffff', borderColor: themeColors.divider }]}>
-                      <MaterialCommunityIcons name="lock-check-outline" size={20} color={themeColors.textMain} style={styles.inputIcon} />
-                      <TextInput
-                        style={[styles.input, { color: themeColors.textMain }]}
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
-                        placeholder="Confirma la contraseña"
-                        placeholderTextColor="#64748b"
-                        secureTextEntry
-                      />
-                    </View>
-                  </>
-                )}
+            {renderChecklist()}
 
-                {renderChecklist()}
-
-                <View style={styles.actionButtons}>
-                  <TouchableOpacity 
-                    style={[styles.cancelButton, { borderColor: themeColors.divider }]} 
-                    onPress={() => {
-                      setIsEditing(false);
-                      setNombre(initialName);
-                      setPassword('');
-                      setConfirmPassword('');
-                    }}
-                  >
-                    <Text style={[styles.cancelButtonText, { color: themeColors.textMain }]}>Cancelar</Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity 
-                    style={[styles.saveButton, (isSaving || (!isNameValid(nombre)) || (password !== '' && !isPasswordValid)) && { opacity: 0.5 }]} 
-                    onPress={handleSave}
-                    disabled={isSaving || (!isNameValid(nombre)) || (password !== '' && !isPasswordValid)}
-                  >
-                    <Text style={styles.saveButtonText}>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
+            <TouchableOpacity 
+              style={[styles.saveBtn, isSaving && {opacity: 0.7}]} 
+              onPress={handleSave} 
+              disabled={isSaving}
+            >
+              <Text style={styles.saveBtnText}>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</Text>
+            </TouchableOpacity>
           </View>
-          <View style={{ height: 40 }} />
-        </ScrollView>
+        )}
+      </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    marginTop: -10,
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 5,
-  },
-  content: {
-    padding: 24,
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 30,
-  },
-  avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#3b82f6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-  },
-  avatarText: {
-    fontSize: 40,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  formSection: {
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-  },
-  editToggleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 15,
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  editButtonText: {
-    color: '#3b82f6',
-    fontWeight: '600',
-    marginLeft: 6,
-    fontSize: 14,
-  },
-  label: {
-    fontSize: 13,
-    marginBottom: 8,
-    marginLeft: 4,
-    fontWeight: '600',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 12,
-    height: 55,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-  },
-  errorInline: {
-    color: '#EF4444',
-    fontSize: 12,
-    marginTop: -10,
-    marginBottom: 15,
-    marginLeft: 4,
-  },
-  checklist: {
-    backgroundColor: 'rgba(0,0,0,0.02)',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  checkItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  checkText: {
-    fontSize: 12,
-    marginLeft: 5,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  cancelButton: {
-    flex: 1,
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  cancelButtonText: {
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  saveButton: {
-    flex: 1.5,
-    backgroundColor: '#3b82f6',
-    height: 50,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
-  }
-});

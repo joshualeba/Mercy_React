@@ -1,4 +1,5 @@
 import React from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -13,6 +14,112 @@ const SOFIPOS_DATA = [
 ];
 
 export default function RankingScreen({ navigation }) {
+  const { colors, isDarkMode } = useContext(ThemeContext);
+
+  const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    color: colors.card,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  introHeader: {
+    padding: 24,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  introTitle: {
+    color: colors.card,
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  introDesc: {
+    color: '#94a3b8',
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  listContainer: {
+    padding: 20,
+  },
+  card: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  rankContainer: {
+    width: 40,
+  },
+  rankText: {
+    color: '#64748b',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  infoContainer: {
+    flex: 1,
+  },
+  name: {
+    color: colors.card,
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  badgesContainer: {
+    flexDirection: 'row',
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  badgeText: {
+    color: '#10B981',
+    fontSize: 10,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  rateContainer: {
+    alignItems: 'flex-end',
+  },
+  rateLabel: {
+    color: '#94a3b8',
+    fontSize: 10,
+    marginBottom: 4,
+  },
+  rateValue: {
+    color: '#10B981',
+    fontSize: 18,
+    fontWeight: '900',
+  }
+});
+
 
   const renderItem = ({ item, index }) => {
     const isTop3 = index < 3;
@@ -74,106 +181,4 @@ export default function RankingScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  introHeader: {
-    padding: 24,
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
-  },
-  introTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  introDesc: {
-    color: '#94a3b8',
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  listContainer: {
-    padding: 20,
-  },
-  card: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.02)',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  rankContainer: {
-    width: 40,
-  },
-  rankText: {
-    color: '#64748b',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  infoContainer: {
-    flex: 1,
-  },
-  name: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 6,
-  },
-  badgesContainer: {
-    flexDirection: 'row',
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  badgeText: {
-    color: '#10B981',
-    fontSize: 10,
-    fontWeight: 'bold',
-    marginLeft: 4,
-  },
-  rateContainer: {
-    alignItems: 'flex-end',
-  },
-  rateLabel: {
-    color: '#94a3b8',
-    fontSize: 10,
-    marginBottom: 4,
-  },
-  rateValue: {
-    color: '#10B981',
-    fontSize: 18,
-    fontWeight: '900',
-  }
-});
+

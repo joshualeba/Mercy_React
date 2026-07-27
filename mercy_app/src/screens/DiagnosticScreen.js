@@ -1,10 +1,144 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function DiagnosticScreen({ navigation }) {
+  const { colors, isDarkMode } = useContext(ThemeContext);
+
+  const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    color: colors.card,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  progressContainer: {
+    height: 4,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    width: '100%',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#3b82f6',
+  },
+  content: {
+    padding: 24,
+  },
+  questionCategory: {
+    color: '#3b82f6',
+    fontWeight: 'bold',
+    fontSize: 14,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+    letterSpacing: 1,
+  },
+  questionText: {
+    color: colors.card,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 30,
+    lineHeight: 32,
+  },
+  optionsContainer: {
+    gap: 15,
+  },
+  optionButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  optionText: {
+    color: '#f8fafc',
+    fontSize: 16,
+  },
+  resultCircleContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 15,
+  },
+  resultCircle: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderWidth: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+  },
+  resultScore: {
+    fontSize: 48,
+    fontWeight: 'bold',
+  },
+  resultMax: {
+    color: '#94a3b8',
+    fontSize: 16,
+  },
+  resultStatus: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 40,
+  },
+  recommendationCard: {
+    padding: 24,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    marginBottom: 40,
+  },
+  recommendationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  recommendationTitle: {
+    color: colors.card,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  recommendationText: {
+    color: '#cbd5e1',
+    fontSize: 15,
+    lineHeight: 24,
+  },
+  primaryButton: {
+    backgroundColor: '#3b82f6',
+    padding: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    color: colors.card,
+    fontSize: 16,
+    fontWeight: 'bold',
+  }
+});
+
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [tips, setTips] = useState([]);
@@ -180,133 +314,4 @@ export default function DiagnosticScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  progressContainer: {
-    height: 4,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    width: '100%',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#3b82f6',
-  },
-  content: {
-    padding: 24,
-  },
-  questionCategory: {
-    color: '#3b82f6',
-    fontWeight: 'bold',
-    fontSize: 14,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-    letterSpacing: 1,
-  },
-  questionText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    lineHeight: 32,
-  },
-  optionsContainer: {
-    gap: 15,
-  },
-  optionButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    padding: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  optionText: {
-    color: '#f8fafc',
-    fontSize: 16,
-  },
-  resultCircleContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 15,
-  },
-  resultCircle: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    borderWidth: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.02)',
-  },
-  resultScore: {
-    fontSize: 48,
-    fontWeight: 'bold',
-  },
-  resultMax: {
-    color: '#94a3b8',
-    fontSize: 16,
-  },
-  resultStatus: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 40,
-  },
-  recommendationCard: {
-    padding: 24,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    marginBottom: 40,
-  },
-  recommendationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  recommendationTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 10,
-  },
-  recommendationText: {
-    color: '#cbd5e1',
-    fontSize: 15,
-    lineHeight: 24,
-  },
-  primaryButton: {
-    backgroundColor: '#3b82f6',
-    padding: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  }
-});
+

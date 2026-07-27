@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Administrador - Mercy</title>
+    <link rel="stylesheet" href="css/admin_login.css">    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://res.cloudinary.com/dpvm2gro2/image/upload/v1769711039/logo_o4wtjy.ico" type="image/x-icon" />
+</head>
+
+<body>
+    <!-- Video de fondo en loop -->
+    <video autoplay loop muted playsinline class="bg-video">
+        <source src="https://res.cloudinary.com/dpvm2gro2/video/upload/v1773878047/1_jch6qe.mp4" type="video/mp4">
+        Tu navegador no soporta videos HTML5.
+    </video>
+    <div class="video-overlay"></div>
+
+    <div class="glass-container">
+        <div class="login-header">
+            <img src="https://res.cloudinary.com/dpvm2gro2/image/upload/v1769711039/logo_o4wtjy.ico" alt="Mercy Logo" class="logo">
+            <h2>Portal de Administración</h2>
+            <p>Acceso exclusivo para personal autorizado de Mercy</p>
+        </div>
+
+        <!-- Muestra errores o mensajes (flash de Flask) -->
+        <div id="alert-box" class="alert-box" style="display: none;"></div>
+
+        <form id="admin-login-form" class="login-form">
+            <div class="input-group">
+                <i class="fas fa-envelope icon"></i>
+                <input type="email" id="correo" name="correo" placeholder="Correo corporativo" required autocomplete="off">
+            </div>
+            
+            <div class="input-group">
+                <i class="fas fa-lock icon"></i>
+                <input type="password" id="contrasena" name="contrasena" placeholder="Contraseña de seguridad" required>
+                <i class="fas fa-eye eye-icon" id="togglePassword"></i>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span class="btn-text">Ingresar al Panel</span>
+                <div class="btn-loader" style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
+            </button>
+        </form>
+
+
+    </div>
+
+    <script>
+        // Toggle password visibility
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#contrasena');
+
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Form submission
+        document.getElementById('admin-login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoader = btn.querySelector('.btn-loader');
+            const alertBox = document.getElementById('alert-box');
+            
+            // UI Loading state
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'block';
+            alertBox.style.display = 'none';
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch("{{ url_for('admin_auth') }}", {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alertBox.className = 'alert-box success';
+                    alertBox.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
+                    alertBox.style.display = 'flex';
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 1000);
+                } else {
+                    alertBox.className = 'alert-box error';
+                    alertBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + data.message;
+                    alertBox.style.display = 'flex';
+                    // Reset UI
+                    btn.disabled = false;
+                    btnText.style.display = 'block';
+                    btnLoader.style.display = 'none';
+                }
+            } catch (error) {
+                alertBox.className = 'alert-box error';
+                alertBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error de conexión con el servidor.';
+                alertBox.style.display = 'flex';
+                // Reset UI
+                btn.disabled = false;
+                btnText.style.display = 'block';
+                btnLoader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

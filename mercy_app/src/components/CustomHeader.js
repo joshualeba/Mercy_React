@@ -26,9 +26,9 @@ export default function CustomHeader({ navigation, route }) {
     navigation.replace('Login');
   };
 
-  const userName = user?.nombre || 'Usuario';
-  const userInitial = userName.charAt(0).toUpperCase();
-  const userEmail = user?.correo_electronico || user?.email || 'correo@mercy.com';
+  const userName = user?.nombre_completo || user?.nombre || 'Usuario';
+  const userInitial = user?.nombre && user?.apellidoP ? `${user.nombre.charAt(0)}${user.apellidoP.charAt(0)}`.toUpperCase() : userName.charAt(0).toUpperCase();
+  const userEmail = user?.correo || user?.correo_electronico || 'correo@mercy.com';
 
   return (
     <View style={[styles.headerContainer, { 
