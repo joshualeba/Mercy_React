@@ -70,7 +70,7 @@ export default function SimuladorAhorroScreen({ navigation }) {
   const calcular = async () => {
     setIsCalculating(true);
     try {
-      const response = await axios.post('http://192.168.1.7:8000/api/simulador/ahorro', {
+      const response = await axios.post('https://twelve-laws-press.loca.lt/api/simulador/ahorro', {
         meta: parseFloat(meta),
         aporte_mensual: parseFloat(aporte),
         tasa_anual: parseFloat(tasa),

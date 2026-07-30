@@ -72,7 +72,7 @@ export default function DiagnosticoScreen({ navigation }) {
   const calcular = async () => {
     setIsCalculating(true);
     try {
-      const response = await axios.post('http://192.168.1.7:8000/api/calcular_salud', {
+      const response = await axios.post('https://twelve-laws-press.loca.lt/api/calcular_salud', {
         ingresos: parseFloat(ingresos),
         gastos: parseFloat(gastos),
         deuda: parseFloat(deuda),

@@ -73,7 +73,7 @@ export default function RegisterScreen({ navigation }) {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('http://192.168.1.7:8000/api/registro', {
+      const response = await axios.post('https://twelve-laws-press.loca.lt/api/registro', {
         nombres: nombres,
         apellidos: apellidos,
         correo_electronico: correo,

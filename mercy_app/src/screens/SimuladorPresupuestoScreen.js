@@ -68,7 +68,7 @@ export default function SimuladorPresupuestoScreen({ navigation }) {
   const calcular = async () => {
     setIsCalculating(true);
     try {
-      const response = await axios.post('http://192.168.1.7:8000/api/simulador/presupuesto', {
+      const response = await axios.post('https://twelve-laws-press.loca.lt/api/simulador/presupuesto', {
         ingresos: parseFloat(ingresos),
         gastos_fijos: parseFloat(fijos),
         gastos_variables: parseFloat(variables)

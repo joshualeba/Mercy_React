@@ -31,6 +31,7 @@ import axios from 'axios';
 
 // Configuración global de Axios
 axios.defaults.headers.common['x-api-key'] = 'MERCY_API_KEY_SUPER_SECRET';
+axios.defaults.headers.common['Bypass-Tunnel-Reminder'] = 'true'; // Bypass localtunnel warning screen
 
 import FullScreenLoader from './src/components/FullScreenLoader';
 

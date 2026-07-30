@@ -172,15 +172,17 @@ export default function FullScreenLoader({ visible, text }) {
           style={styles.gradient}
         >
           <View style={styles.loaderWrapper}>
-            <WebView
-              originWhitelist={['*']}
-              source={{ html: HTML_LOADER }}
-              style={styles.webview}
-              scrollEnabled={false}
-              showsHorizontalScrollIndicator={false}
-              showsVerticalScrollIndicator={false}
-              bounces={false}
-            />
+              <WebView
+                originWhitelist={['*']}
+                source={{ html: HTML_LOADER }}
+                style={styles.webview}
+                scrollEnabled={false}
+                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+                opaque={false}
+                backgroundColor="transparent"
+              />
           </View>
           <Text style={styles.text}>{fraseActiva}</Text>
         </LinearGradient>

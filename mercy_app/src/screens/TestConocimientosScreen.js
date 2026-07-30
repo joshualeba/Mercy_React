@@ -107,7 +107,7 @@ export default function TestConocimientosScreen({ navigation }) {
 
   const fetchTest = async () => {
     try {
-      const response = await axios.get('http://192.168.1.7:8000/api/preguntas_test', {
+      const response = await axios.get('https://twelve-laws-press.loca.lt/api/preguntas_test', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       setTestData(response.data);
@@ -127,7 +127,7 @@ export default function TestConocimientosScreen({ navigation }) {
 
   const fetchRanking = async () => {
     try {
-      const response = await axios.get('http://192.168.1.7:8000/api/ranking_test', {
+      const response = await axios.get('https://twelve-laws-press.loca.lt/api/ranking_test', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       if (response.data.success) {
@@ -247,7 +247,7 @@ export default function TestConocimientosScreen({ navigation }) {
         tiempo_segundos: timer
       };
       
-      const response = await axios.post('http://192.168.1.7:8000/api/submit_test', payload, {
+      const response = await axios.post('https://twelve-laws-press.loca.lt/api/submit_test', payload, {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       

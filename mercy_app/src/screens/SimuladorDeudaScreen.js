@@ -68,7 +68,7 @@ export default function SimuladorDeudaScreen({ navigation }) {
   const calcular = async () => {
     setIsCalculating(true);
     try {
-      const response = await axios.post('http://192.168.1.7:8000/api/simulador/deuda', {
+      const response = await axios.post('https://twelve-laws-press.loca.lt/api/simulador/deuda', {
         saldo_total: parseFloat(saldoTotal),
         pago_mensual: parseFloat(pagoMensual),
         tasa_anual: parseFloat(tasa)

@@ -76,7 +76,7 @@ export default function ProfileScreen({ navigation }) {
             password_nueva: newPassword !== '' ? newPassword : null,
         };
         
-        const response = await axios.put('http://192.168.1.7:8000/api/update_profile', payload, {
+        const response = await axios.put('https://twelve-laws-press.loca.lt/api/update_profile', payload, {
             headers: { Authorization: `Bearer ${userToken}` }
         });
         
