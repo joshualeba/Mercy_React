@@ -924,7 +924,7 @@ def admin_usuario_detalle(usuario_id):
     return jsonify(
         success=True,
         id=usuario.id,
-        nombre=f"{usuario.datosp.nombre} {usuario.datosp.apellidoP}",
+        nombre=f"{usuario.datosp.nombre} {usuario.datosp.apellidoP}" if usuario.datosp else "Usuario Sin Datos",
         correo=usuario.correo_electronico,
         rol=usuario.role,
         fecha_registro=formato_fecha_es(usuario.fecha_registro),
