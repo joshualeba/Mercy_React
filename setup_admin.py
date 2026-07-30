@@ -20,8 +20,9 @@ else:
     
     # Insert Usuario
     hashed_pw = generate_password_hash('Contraseña123!')
-    c.execute("INSERT INTO usuarios (id_datosP, correo_electronico, contrasena, role) VALUES (?, ?, ?, ?)",
-              (id_datosp, 'joshualeba2109@gmail.com', hashed_pw, 'superadmin'))
+    now = datetime.now()
+    c.execute("INSERT INTO usuarios (id_datosP, correo_electronico, contrasena, role, fecha_registro, test_completado) VALUES (?, ?, ?, ?, ?, ?)",
+              (id_datosp, 'joshualeba2109@gmail.com', hashed_pw, 'superadmin', now, 0))
 
 conn.commit()
 conn.close()
