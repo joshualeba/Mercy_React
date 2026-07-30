@@ -18,6 +18,10 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Mercy API")
 
+# Prometheus Monitoring
+from prometheus_fastapi_instrumentator import Instrumentator
+Instrumentator().instrument(app).expose(app)
+
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
