@@ -73,7 +73,7 @@ export default function RegisterScreen({ navigation }) {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('https://twelve-laws-press.loca.lt/api/registro', {
+      const response = await axios.post('https://mercyreact.duckdns.org/api/registro', {
         nombres: nombres,
         apellidos: apellidos,
         correo_electronico: correo,

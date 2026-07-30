@@ -44,7 +44,7 @@ export default function GlosarioScreen({ navigation }) {
 
   const fetchGlosario = async () => {
     try {
-      const response = await axios.get('https://twelve-laws-press.loca.lt/api/glosario', {
+      const response = await axios.get('https://mercyreact.duckdns.org/api/glosario', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       if (response.data.success) {

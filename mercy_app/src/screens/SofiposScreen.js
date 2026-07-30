@@ -44,7 +44,7 @@ export default function SofiposScreen({ navigation }) {
 
   const fetchSofipos = async () => {
     try {
-      const response = await axios.get('https://twelve-laws-press.loca.lt/api/sofipos_data', {
+      const response = await axios.get('https://mercyreact.duckdns.org/api/sofipos_data', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       if (response.data.success) {

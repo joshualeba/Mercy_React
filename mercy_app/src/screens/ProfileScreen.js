@@ -76,7 +76,7 @@ export default function ProfileScreen({ navigation }) {
             password_nueva: newPassword !== '' ? newPassword : null,
         };
         
-        const response = await axios.put('https://twelve-laws-press.loca.lt/api/update_profile', payload, {
+        const response = await axios.put('https://mercyreact.duckdns.org/api/update_profile', payload, {
             headers: { Authorization: `Bearer ${userToken}` }
         });
         

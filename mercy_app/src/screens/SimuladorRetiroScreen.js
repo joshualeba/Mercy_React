@@ -72,7 +72,7 @@ export default function SimuladorRetiroScreen({ navigation }) {
   const calcular = async () => {
     setIsCalculating(true);
     try {
-      const response = await axios.post('https://twelve-laws-press.loca.lt/api/simulador/retiro', {
+      const response = await axios.post('https://mercyreact.duckdns.org/api/simulador/retiro', {
         edad_actual: parseInt(edadActual),
         edad_retiro: parseInt(edadRetiro),
         ahorro_actual: parseFloat(ahorroActual),

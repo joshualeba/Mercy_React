@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.1.100:8000/api';
+const API_URL = 'https://mercyreact.duckdns.org/api';
 
 export default function ChatbotModal({ visible, onClose }) {
   const [messages, setMessages] = useState([

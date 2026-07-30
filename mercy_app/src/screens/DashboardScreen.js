@@ -40,7 +40,7 @@ export default function DashboardScreen({ navigation }) {
     try {
       setRadarNoticia('Sincronizando radar bursátil...');
       setRadarFecha('');
-      const response = await axios.get('https://twelve-laws-press.loca.lt/api/radar', {
+      const response = await axios.get('https://mercyreact.duckdns.org/api/radar', {
         headers: { 'x-api-key': 'MERCY_API_KEY_SUPER_SECRET' }
       });
       if (response.data && response.data.noticia) {

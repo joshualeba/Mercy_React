@@ -68,7 +68,7 @@ export default function SimuladorCreditoScreen({ navigation }) {
   const calcular = async () => {
     setIsCalculating(true);
     try {
-      const response = await axios.post('https://twelve-laws-press.loca.lt/api/simulador/credito', {
+      const response = await axios.post('https://mercyreact.duckdns.org/api/simulador/credito', {
         monto: parseFloat(monto),
         plazo_meses: parseInt(plazo),
         tasa_anual: parseFloat(tasa)

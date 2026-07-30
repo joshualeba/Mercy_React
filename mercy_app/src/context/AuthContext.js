@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (correo, contrasena) => {
     setIsLoading(true);
     try {
-      const response = await axios.post('https://twelve-laws-press.loca.lt/api/login', { correo, contrasena });
+      const response = await axios.post('https://mercyreact.duckdns.org/api/login', { correo, contrasena });
 
       if (response.data.access_token) {
         setUserToken(response.data.access_token);
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
       let userData = await AsyncStorage.getItem('user');
       if (token && userData) {
         try {
-          await axios.get('https://twelve-laws-press.loca.lt/api/verify_session', {
+          await axios.get('https://mercyreact.duckdns.org/api/verify_session', {
             headers: { Authorization: `Bearer ${token}` }
           });
           setUserToken(token);

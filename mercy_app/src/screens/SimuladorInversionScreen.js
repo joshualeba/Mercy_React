@@ -70,7 +70,7 @@ export default function SimuladorInversionScreen({ navigation }) {
   const calcular = async () => {
     setIsCalculating(true);
     try {
-      const response = await axios.post('https://twelve-laws-press.loca.lt/api/simulador/inversion', {
+      const response = await axios.post('https://mercyreact.duckdns.org/api/simulador/inversion', {
         monto_inicial: parseFloat(montoInicial),
         aporte_mensual: parseFloat(aporte),
         anos: parseInt(anos),
