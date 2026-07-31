@@ -111,13 +111,20 @@ def login(request: Request, user: schemas.UserLogin, db: Session = Depends(get_d
     elif role_str == 'admin':
         raise HTTPException(status_code=403, detail="Esta cuenta tiene privilegios de Administrador. La aplicación móvil es exclusiva para clientes. Por favor, ingresa a tu portal administrativo web.")
         
-    if not verify_password(user.contrasena, db_user.contrasena):
-        # Allow checking werkzeug hashes from previous flask app
-        from werkzeug.security import check_password_hash
-        if check_password_hash(db_user.contrasena, user.contrasena):
-            pass
+    is_valid = False
+    try:
+        if db_user.contrasena.startswith('$2'):
+            if verify_password(user.contrasena, db_user.contrasena):
+                is_valid = True
         else:
-            raise HTTPException(status_code=401, detail="La contraseña ingresada es incorrecta. Por favor, verifica tus datos e inténtalo nuevamente.")
+            from werkzeug.security import check_password_hash
+            if check_password_hash(db_user.contrasena, user.contrasena):
+                is_valid = True
+    except Exception:
+        pass
+        
+    if not is_valid:
+        raise HTTPException(status_code=401, detail="La contraseña ingresada es incorrecta. Por favor, verifica tus datos e inténtalo nuevamente.")
     
     # Update last login
     db_user.ultima_sesion = datetime.now()
