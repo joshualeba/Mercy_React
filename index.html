@@ -698,63 +698,6 @@
         </div>
     </footer>
 
-    <!-- Chatbot widget (Dashboard Style for landing page) -->
-    <div id="chatbotCta" class="chatbot-call-to-action">
-        <span>¡Prueba a Mercy IA aquí!</span>
-        <div class="chatbot-cta-arrow"></div>
-    </div>
-    <button type="button" class="btn btn-primary shadow-lg hover-scale chatbot-trigger" id="chatbotTriggerBtn"
-        aria-label="Abrir asistente">
-        <i class="bi bi-heart-pulse-fill fs-3"></i>
-    </button>
-
-    <div id="bankChatbotContainer" class="chatbot-container d-none">
-        <div class="chatbot-header">
-            <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-heart-pulse-fill text-danger me-2 fs-5"></i>
-                <div>
-                    <span class="fw-bold text-dark">Mercy IA</span>
-                </div>
-            </div>
-            <button type="button" id="closeChatbotBtn" class="btn btn-sm btn-link text-muted p-0"
-                aria-label="Minimizar chat">
-                <i class="bi bi-dash-lg fs-5"></i>
-            </button>
-        </div>
-
-        <div class="chatbot-messages" id="chatbotMessages">
-            <div class="chat-bubble ai-bubble">
-                ¡Hola! Soy Mercy, tu IA financiera personal. ¿En qué te puedo ayudar hoy?
-            </div>
-            <div class="d-flex flex-wrap gap-2 mt-2" id="landingQuickActions">
-                <button class="btn btn-sm btn-outline-primary rounded-pill landing-quick-btn"
-                    data-query="¿Qué puedo hacer en Mercy?">¿Qué es Mercy?</button>
-                <button class="btn btn-sm btn-outline-primary rounded-pill landing-quick-btn"
-                    data-query="¿Cómo me registro en Mercy?">¿Cómo me registro?</button>
-                <button class="btn btn-sm btn-outline-primary rounded-pill landing-quick-btn"
-                    data-query="¿Qué simuladores tienen disponibles?">Simuladores disponibles</button>
-            </div>
-        </div>
-
-        <!-- Botón de detener respuesta -->
-        <div id="landingChatbotStopContainer" class="d-none text-center py-1"
-            style="border-top: 1px solid rgba(0,0,0,0.06);">
-            <button id="landingChatbotStopBtn" class="btn btn-sm btn-light rounded-pill px-3"
-                style="font-size: 0.8rem; color: #6b7280; border: 1px solid #e5e7eb; font-weight: 500;">
-                <i class="bi bi-stop-circle-fill text-danger me-1"></i> Detener
-            </button>
-        </div>
-
-        <div class="chatbot-input-area border-top bg-light">
-            <input type="text" id="chatbotInput" class="form-control" placeholder="Escribe tu pregunta..."
-                autocomplete="off">
-            <button id="chatbotSendBtn" class="btn btn-primary rounded-circle shadow-sm"
-                style="width: 40px; height: 40px; padding: 0;" aria-label="Enviar">
-                <i class="bi bi-send-fill" style="margin-left: -2px;"></i>
-            </button>
-        </div>
-    </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
     <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
@@ -784,7 +727,6 @@
         }, 3000);
     </script>
     <script src="js/index.js"></script>
-    <script src="js/chat.js"></script>
 </body>
 
 </html>
