@@ -62,7 +62,7 @@ services:
     image: grafana/grafana
     environment:
       - GF_SERVER_DOMAIN=mercyreact.duckdns.org
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/
+      - GF_SERVER_ROOT_URL=https://mercyreact.duckdns.org/grafana/
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     ports:
       - "3000:3000"
