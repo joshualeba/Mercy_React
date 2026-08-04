@@ -10,6 +10,11 @@ services:
       - .:/app
     networks:
       - private_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   api1:
     build: .
@@ -20,6 +25,11 @@ services:
       - .:/app
     networks:
       - private_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   api2:
     build: .
@@ -30,6 +40,11 @@ services:
       - .:/app
     networks:
       - private_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
     image: nginx:latest
@@ -48,6 +63,11 @@ services:
     networks:
       - public_network
       - private_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   prometheus:
     image: prom/prometheus
