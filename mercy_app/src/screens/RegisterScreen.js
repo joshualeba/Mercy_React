@@ -84,7 +84,7 @@ export default function RegisterScreen({ navigation }) {
         setIsLoading(false);
         showAlert('¡Éxito!', 'Tu cuenta ha sido creada. Serás redirigido para iniciar sesión...');
         setTimeout(() => {
-          navigation.goBack();
+          navigation.navigate('Login');
         }, 3000);
       }
     } catch (e) {
@@ -162,7 +162,7 @@ export default function RegisterScreen({ navigation }) {
               <Text style={styles.buttonText}>Crear cuenta</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.registerLink} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={styles.registerLink} onPress={() => navigation.navigate('Login')}>
               <Text style={styles.registerText}>¿Ya tienes cuenta? <Text style={{fontWeight: 'bold', color: '#fff'}}>Inicia sesión</Text></Text>
             </TouchableOpacity>
           </View>
