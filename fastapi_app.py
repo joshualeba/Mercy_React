@@ -405,7 +405,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 @app.get("/api/verify_session")
-def verify_session(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+@limiter.limit("5/minute")
+def verify_session(request: Request, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     usuario = get_current_user(token, db)
     role_str = usuario.role.strip().lower() if usuario.role else ''
     if role_str == 'superadmin':
