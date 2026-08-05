@@ -20,7 +20,7 @@ app = FastAPI(title="Mercy API")
 
 # Prometheus Monitoring
 from prometheus_fastapi_instrumentator import Instrumentator
-Instrumentator().instrument(app).expose(app)
+Instrumentator(should_group_status_codes=False).instrument(app).expose(app)
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
