@@ -669,6 +669,7 @@ def sim_deuda(request: Request, data: schemas.SimuladorDeudaIn, current_user: mo
 # --- ENDPOINTS MÓVIL (Glosario y Test) ---
 
 @app.get("/api/glosario")
+@limiter.limit("5/minute")
 def get_glosario(request: Request, db: Session = Depends(get_db)):
     terminos = db.query(models.Glosario).order_by(models.Glosario.termino).all()
     return {"success": True, "terminos": [{"id": t.id, "termino": t.termino, "descripcion": t.descripcion, "categoria": t.categoria} for t in terminos]}
