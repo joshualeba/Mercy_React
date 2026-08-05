@@ -3,6 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
+    image: mercy_backend:latest
     command: gunicorn --bind 0.0.0.0:5000 app:app
     env_file:
       - .env
@@ -17,7 +18,9 @@ services:
         max-file: "3"
 
   api1:
-    build: .
+    image: mercy_backend:latest
+    depends_on:
+      - web
     command: uvicorn fastapi_app:app --host 0.0.0.0 --port 8000
     env_file:
       - .env
@@ -32,7 +35,9 @@ services:
         max-file: "3"
 
   api2:
-    build: .
+    image: mercy_backend:latest
+    depends_on:
+      - web
     command: uvicorn fastapi_app:app --host 0.0.0.0 --port 8000
     env_file:
       - .env
