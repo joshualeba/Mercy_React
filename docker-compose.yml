@@ -86,14 +86,9 @@ services:
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     ports:
       - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
     networks:
       - private_network
 
 networks:
   public_network:
   private_network:
-
-volumes:
-  grafana_data:
